@@ -82,7 +82,7 @@ class _AddPageState extends State<AddPage> {
     if(myKey.currentState.validate()){
       myKey.currentState.save();
       if (title != null && description != null) {
-        return Model(title, description);
+        return Model(title, description,false);
       } else {
         throw Exception("The values are null");
       }

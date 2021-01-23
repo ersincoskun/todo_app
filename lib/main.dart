@@ -29,11 +29,7 @@ class MyAppHome extends StatefulWidget {
 
 class _MyAppHomeState extends State<MyAppHome> {
   List<Model> myList = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  bool checkValue = false;
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +51,7 @@ class _MyAppHomeState extends State<MyAppHome> {
             ),
           ).then((value) {
             setState(() {
-              if(value!=null)
-              myList.add(value);
+              if (value != null) myList.insert(0, value);
             });
           });
         },
@@ -67,31 +62,83 @@ class _MyAppHomeState extends State<MyAppHome> {
 
   Widget _myBody() {
     return Align(
-      alignment: Alignment.topCenter,
-      child: ListView.builder(
-        reverse: true,
-        shrinkWrap: true,
-        itemBuilder: _listViewBuild,
-        itemCount: myList.length,
-      ),
-    );
+        child: ReorderableListView(
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              if(newIndex>oldIndex){
+                newIndex-=1;
+              }
+              final item=myList.removeAt(oldIndex);
+              myList.insert(newIndex, item);
+            });
+          },
+          children: [
+            for (Model item in myList)
+              Dismissible(
+                direction: DismissDirection.startToEnd,
+                key: Key(
+                  item.title,
+                ),
+                onDismissed: (direction) {
+                  setState(() => myList.remove(item));
+                },
+                child: item.checkValue == false
+                    ? _myListItem(
+                    item, Colors.white, Colors.black, ValueKey(item))
+                    : _myListItem(
+                    item, Colors.green, Colors.white, ValueKey(item)),
+              )
+
+
+          ],
+        ));
   }
 
-  Widget _listViewBuild(context, index) {
-    return Dismissible(
-      direction: DismissDirection.startToEnd,
-      key: Key(
-        index.toString(),
-      ),
-      onDismissed: (direction) {
-        setState(() {
-          myList.removeAt(index);
-        });
-      },
-      child: ListTile(
-        title: Text(myList[index].title),
-        subtitle: Text(myList[index].description),
+  Padding _myListItem(Model item, cardColor, textColor, key) {
+    return Padding(
+      key: key,
+      padding: EdgeInsets.fromLTRB(12, 10, 12, 0),
+      child: Card(
+        key: key,
+        color: cardColor,
+        child: ListTile(
+          key: key,
+          leading: Checkbox(
+            key: key,
+            activeColor: Colors.indigo,
+            value: item.checkValue,
+            onChanged: (value) {
+              setState(
+                () {
+                  item.checkValue = value;
+                  if (value == true) {
+                    myList.remove(item);
+                    myList.insert(0, item);
+                  }
+                },
+              );
+            },
+          ),
+          title: Text(
+            item.title,
+            style: TextStyle(
+              color: textColor,
+            ),
+          ),
+          subtitle: Text(
+            item.description,
+            style: TextStyle(
+              color: textColor,
+            ),
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: Colors.indigo,
+          ),
+        ),
       ),
     );
   }
 }
+
+//item click events
