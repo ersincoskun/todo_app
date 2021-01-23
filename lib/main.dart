@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/add_page.dart';
 
 import 'model/model.dart';
 
@@ -26,11 +28,10 @@ class MyAppHome extends StatefulWidget {
 }
 
 class _MyAppHomeState extends State<MyAppHome> {
-  List<Model> myList=[];
+  List<Model> myList = [];
 
   @override
   void initState() {
-    _generateMyList();
     super.initState();
   }
 
@@ -39,47 +40,58 @@ class _MyAppHomeState extends State<MyAppHome> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Todo App",
+          "Todo List",
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.add,
         ),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddPage(),
+            ),
+          ).then((value) {
+            setState(() {
+              if(value!=null)
+              myList.add(value);
+            });
+          });
+        },
       ),
       body: _myBody(),
     );
   }
 
   Widget _myBody() {
-    return ListView.builder(
-      itemBuilder: _listViewBuild,
-      itemCount: myList.length,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ListView.builder(
+        reverse: true,
+        shrinkWrap: true,
+        itemBuilder: _listViewBuild,
+        itemCount: myList.length,
+      ),
     );
   }
 
   Widget _listViewBuild(context, index) {
-      return Dismissible(
-        direction: DismissDirection.startToEnd,
-        key: Key(
-          index.toString(),
-        ),
-        onDismissed: (direction) {
-          setState(() {
-            myList.removeAt(index);
-          });
-        },
-        child: ListTile(
-          title: Text(myList[index].title),
-          subtitle: Text(myList[index].description),
-        ),
-      );
-    }
-
-  _generateMyList() {
-    for (int i = 0; i < 12; i++) {
-      myList.add(Model("$i. title", "$i. description"));
-    }
+    return Dismissible(
+      direction: DismissDirection.startToEnd,
+      key: Key(
+        index.toString(),
+      ),
+      onDismissed: (direction) {
+        setState(() {
+          myList.removeAt(index);
+        });
+      },
+      child: ListTile(
+        title: Text(myList[index].title),
+        subtitle: Text(myList[index].description),
+      ),
+    );
   }
 }
